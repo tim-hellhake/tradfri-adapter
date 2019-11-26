@@ -9,3 +9,6 @@
 ## Configuration
 1. Go to settings
 2. Add the security code from the bottom of your gateway
+
+## Supported devices
+* Light Bulb
