@@ -1,0 +1,55 @@
+{
+  "name": "tradfri-adapter",
+  "display_name": "Tradfri",
+  "version": "0.1.0",
+  "description": "Connect your Tradfri devices",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc -p ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tim-hellhake/tradfri-adapter.git"
+  },
+  "author": "Tim Hellhake",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/tim-hellhake/tradfri-adapter/issues"
+  },
+  "homepage": "https://github.com/tim-hellhake/tradfri-adapter#readme",
+  "files": [
+    "LICENSE",
+    "SHA256SUMS",
+    "lib/index.js",
+    "lib/tradfri-adapter.js",
+    "manifest.json"
+  ],
+  "moziot": {
+    "api": {
+      "min": 2,
+      "max": 2
+    },
+    "plugin": true,
+    "exec": "{nodeLoader} {path}",
+    "schema": {
+      "type": "object",
+      "required": [
+        "securityCode"
+      ],
+      "properties": {
+        "securityCode": {
+          "type": "string",
+          "title": "The security code on the bottom of your tradfri gateway"
+        }
+      }
+    }
+  },
+  "dependencies": {
+    "node-tradfri-client": "^2.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^12.12.14",
+    "typescript": "^3.7.2"
+  }
+}

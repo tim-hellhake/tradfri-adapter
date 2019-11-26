@@ -1,0 +1,33 @@
+{
+  "manifest_version": 1,
+  "id": "tradfri-adapter",
+  "name": "Tradfri",
+  "short_name": "Tradfri",
+  "version": "0.1.0",
+  "description": "Connect your Tradfri devices",
+  "homepage_url": "https://github.com/tim-hellhake/tradfri-adapter#readme",
+  "license": "MPL-2.0",
+  "author": "Tim Hellhake",
+  "gateway_specific_settings": {
+    "webthings": {
+      "exec": "{nodeLoader} {path}",
+      "strict_min_version": "0.10.0",
+      "strict_max_version": "*",
+      "primary_type": "adapter"
+    }
+  },
+  "options": {
+    "schema": {
+      "type": "object",
+      "required": [
+        "securityCode"
+      ],
+      "properties": {
+        "securityCode": {
+          "type": "string",
+          "title": "The security code on the bottom of your tradfri gateway"
+        }
+      }
+    }
+  }
+}
