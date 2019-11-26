@@ -1,5 +1,6 @@
 # Tradfri Adapter
 
+[![build](https://github.com/tim-hellhake/tradfri-adapter/workflows/Build/badge.svg)](https://github.com/tim-hellhake/tradfri-adapter/actions?query=workflow:Build)
 [![dependencies](https://david-dm.org/tim-hellhake/tradfri-adapter.svg)](https://david-dm.org/tim-hellhake/tradfri-adapter)
 [![devDependencies](https://david-dm.org/tim-hellhake/tradfri-adapter/dev-status.svg)](https://david-dm.org/tim-hellhake/tradfri-adapter?type=dev)
 [![optionalDependencies](https://david-dm.org/tim-hellhake/tradfri-adapter/optional-status.svg)](https://david-dm.org/tim-hellhake/tradfri-adapter?type=optional)
