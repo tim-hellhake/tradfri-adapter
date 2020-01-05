@@ -27,5 +27,6 @@ rm ${TARFILE}
 TARFILE_ARCH="${TARFILE/.tgz/${TARFILE_SUFFIX}.tgz}"
 cp -r node_modules ./package
 tar czf ${TARFILE_ARCH} package
+sha256sum ${TARFILE_ARCH} > ${TARFILE_ARCH}.sha256sum
 rm -rf package
 echo "Created ${TARFILE_ARCH}"
