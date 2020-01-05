@@ -1,5 +1,7 @@
 #!/bin/bash
 
+npm ci
+npm run build
 rm -rf node_modules
 
 if [ -z "${ADDON_ARCH}" ]; then
