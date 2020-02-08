@@ -96,15 +96,28 @@ class BrightnessProperty extends Property {
   }
 }
 
-class LightBulb extends Device {
+abstract class TradfriDevice extends Device {
+
+  constructor(adapter: Adapter, accessory: Accessory) {
+    super(adapter, `${accessory.instanceId}`);
+    this['@context'] = 'https://iot.mozilla.org/schemas/';
+    this.name = accessory.name;
+  }
+
+  addProperty(property: Property) {
+    this.properties.set(property.name, property);
+  }
+
+  public abstract update(accessory: Accessory) : void
+}
+
+class LightBulb extends TradfriDevice {
   private onOffProperty: OnOffProperty;
   private brightnessProperty: BrightnessProperty;
 
   constructor(adapter: Adapter, accessory: Accessory, light: Light, tradfri: TradfriClient) {
-    super(adapter, `${accessory.instanceId}`);
-    this['@context'] = 'https://iot.mozilla.org/schemas/';
+    super(adapter, accessory);
     this['@type'] = ['Light'];
-    this.name = accessory.name;
 
     this.onOffProperty = new OnOffProperty(this, async value => {
       await tradfri.operateLight(accessory, {
@@ -122,10 +135,7 @@ class LightBulb extends Device {
 
   }
 
-  addProperty(property: Property) {
-    this.properties.set(property.name, property);
-  }
-
+ 
   public update(accessory: Accessory) {
     if (accessory.lightList && accessory.lightList.length > 0) {
       let light = accessory.lightList[0];
@@ -190,8 +200,38 @@ class ColorLightBulb extends LightBulb  {
   }
 }
 
+class SmartPlug extends TradfriDevice {
+  private onOffProperty: OnOffProperty;
+
+  constructor(adapter: Adapter, accessory: Accessory, tradfri: TradfriClient) {
+    super(adapter, accessory);
+    this['@type'] = ['SmartPlug'];
+
+    this.onOffProperty = new OnOffProperty(this, async value => {
+      await tradfri.operatePlug(accessory, {
+        onOff: value,
+      }, true);
+    });
+
+    this.addProperty(this.onOffProperty);
+
+  }
+
+  
+  public update(accessory: Accessory) {
+    if (accessory.plugList && accessory.plugList.length > 0) {
+      let plug = accessory.plugList[0];
+
+      this.onOffProperty.setCachedValue(plug.onOff);
+      this.notifyPropertyChanged(this.onOffProperty);
+      console.log(`${accessory.name} (${accessory.instanceId}) / ${plug.onOff}`);
+    }
+  }
+}
+
+
 export class TradfriAdapter extends Adapter {
-  private devices: { [key: string]: LightBulb } = {};
+  private devices: { [key: string]: TradfriDevice } = {};
 
   constructor(addonManager: any, manifest: any, name: string, tradfri: TradfriClient) {
     super(addonManager, name, manifest.id);
@@ -214,6 +254,17 @@ export class TradfriAdapter extends Adapter {
               } else {
                  device = new LightBulb(this, accessory, light, tradfri);
               }
+             
+              this.devices[accessory.instanceId] = device;
+              this.handleDeviceAdded(device);
+            }
+          }
+          if (accessory.type == AccessoryTypes.plug) {
+            if (accessory.plugList && accessory.plugList.length > 0) {
+              console.log(`Creating device for ${accessory.name} (${accessory.instanceId})`);
+              
+                device = new SmartPlug(this,  accessory, tradfri);
+              
              
               this.devices[accessory.instanceId] = device;
               this.handleDeviceAdded(device);
