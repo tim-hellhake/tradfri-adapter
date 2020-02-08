@@ -9,6 +9,15 @@
 import { Adapter, Device, Property } from 'gateway-addon';
 import { TradfriClient, Accessory, AccessoryTypes, Light } from 'node-tradfri-client';
 
+//See WhiteSpectrumLightBulb
+function kelvinToPercent(value: number) : number {
+    return (value-2000)/2000*100;
+}
+//See WhiteSpectrumLightBulb
+function percentToKelvin(value: number) : number {
+    return (value/100)*2000+2000;
+}
+
 class OnOffProperty extends Property {
   constructor(private device: Device, private set: (value: boolean) => Promise<void>) {
     super(device, 'on', {
@@ -51,14 +60,14 @@ class ColorProperty extends Property {
 }
 
 class ColorTemperatureProperty extends Property {
-  constructor(private device: Device, private set: (value: number) => Promise<void>) {
+  constructor(private device: Device, minimum:number, maximum: number, private set: (value: number) => Promise<void>) {
     super(device, 'colorTemperature', {
       '@type': 'ColorTemperatureProperty',
       type: 'integer',
       unit: "kelvin",
       title: 'ColorTemperature',
-      minimum: 2000, 
-      maximum: 4000,
+      minimum, 
+      maximum,
       description: 'Color temperature of the lightbulb'
     });
   }
@@ -67,8 +76,7 @@ class ColorTemperatureProperty extends Property {
     try {
       console.log(`Set value of ${this.device.name} / ${this.title} to ${value}`);
       await super.setValue(value);
-      var percentageValue : number = (value-2000)/2000*100;
-      this.set(percentageValue);
+      this.set(value);
     } catch (e) {
       console.log(`Could not set value: ${e}`);
     }
@@ -157,11 +165,14 @@ class WhiteSpectrumLightBulb extends LightBulb  {
   constructor(adapter: Adapter, accessory: Accessory, light: Light, tradfri: TradfriClient) {
     super(adapter, accessory, light, tradfri);
     
-    this.colorTemperatureProperty = new ColorTemperatureProperty(this, async value => {
-        await light.setColorTemperature(value);
-      });
+    // Acording to ikea website 
+    // "The colour temperature can be switched between 2200 Kelvin (warm glow), [...] and 4000 Kelvin (cool white)."
+    // The mozila proposal recommand using Kelvin, but the node client use percentage.
+    this.colorTemperatureProperty = new ColorTemperatureProperty(this, 2000, 4000, async value => {
+        await light.setColorTemperature(kelvinToPercent(value));
+    });
 
-      this.addProperty(this.colorTemperatureProperty);
+    this.addProperty(this.colorTemperatureProperty);
   }
 
   public update(accessory: Accessory) {
@@ -169,7 +180,7 @@ class WhiteSpectrumLightBulb extends LightBulb  {
     if (accessory.lightList && accessory.lightList.length > 0) {
       let light = accessory.lightList[0];
 
-      this.colorTemperatureProperty.setCachedValue(2000+2000*(light.colorTemperature/100));
+      this.colorTemperatureProperty.setCachedValue(percentToKelvin(light.colorTemperature));
       this.notifyPropertyChanged(this.colorTemperatureProperty);
       console.log(`${accessory.name} (${accessory.instanceId}) / ${light.colorTemperature}`);
     }
