@@ -29,6 +29,51 @@ class OnOffProperty extends Property {
     }
   }
 }
+class ColorProperty extends Property {
+  constructor(private device: Device, private set: (value: string) => Promise<void>) {
+    super(device, 'color', {
+      '@type': 'ColorProperty',
+      type: 'string',
+      title: 'Color',
+      description: 'Color of the lightbulb'
+    });
+  }
+
+  async setValue(value: string) {
+    try {
+      console.log(`Set value of ${this.device.name} / ${this.title} to ${value}`);
+      await super.setValue(value);
+      this.set(value);
+    } catch (e) {
+      console.log(`Could not set value: ${e}`);
+    }
+  }
+}
+
+class ColorTemperatureProperty extends Property {
+  constructor(private device: Device, private set: (value: number) => Promise<void>) {
+    super(device, 'colorTemperature', {
+      '@type': 'ColorTemperatureProperty',
+      type: 'integer',
+      unit: "kelvin",
+      title: 'ColorTemperature',
+      minimum: 2000, 
+      maximum: 4000,
+      description: 'Color temperature of the lightbulb'
+    });
+  }
+
+  async setValue(value: number) {
+    try {
+      console.log(`Set value of ${this.device.name} / ${this.title} to ${value}`);
+      await super.setValue(value);
+      var percentageValue : number = (value-2000)/2000*100;
+      this.set(percentageValue);
+    } catch (e) {
+      console.log(`Could not set value: ${e}`);
+    }
+  }
+}
 
 class BrightnessProperty extends Property {
   constructor(private device: Device, private set: (value: number) => Promise<void>) {
@@ -74,6 +119,7 @@ class LightBulb extends Device {
     });
 
     this.addProperty(this.brightnessProperty);
+
   }
 
   addProperty(property: Property) {
@@ -95,6 +141,55 @@ class LightBulb extends Device {
   }
 }
 
+class WhiteSpectrumLightBulb extends LightBulb  {
+  private colorTemperatureProperty: ColorTemperatureProperty;
+
+  constructor(adapter: Adapter, accessory: Accessory, light: Light, tradfri: TradfriClient) {
+    super(adapter, accessory, light, tradfri);
+    
+    this.colorTemperatureProperty = new ColorTemperatureProperty(this, async value => {
+        await light.setColorTemperature(value);
+      });
+
+      this.addProperty(this.colorTemperatureProperty);
+  }
+
+  public update(accessory: Accessory) {
+    super.update(accessory);
+    if (accessory.lightList && accessory.lightList.length > 0) {
+      let light = accessory.lightList[0];
+
+      this.colorTemperatureProperty.setCachedValue(2000+2000*(light.colorTemperature/100));
+      this.notifyPropertyChanged(this.colorTemperatureProperty);
+      console.log(`${accessory.name} (${accessory.instanceId}) / ${light.colorTemperature}`);
+    }
+  }
+}
+
+class ColorLightBulb extends LightBulb  {
+  private colorProperty: ColorProperty;
+
+  constructor(adapter: Adapter, accessory: Accessory, light: Light, tradfri: TradfriClient) {
+    super(adapter, accessory, light, tradfri);
+    
+    this.colorProperty = new ColorProperty(this, async value => {
+      await light.setColor(value.slice(1));
+    });
+    this.addProperty(this.colorProperty);
+  }
+
+  public update(accessory: Accessory) {
+    super.update(accessory);
+    if (accessory.lightList && accessory.lightList.length > 0) {
+      let light = accessory.lightList[0];
+
+      this.colorProperty.setCachedValue("#"+light.color);
+      this.notifyPropertyChanged(this.colorProperty);
+      console.log(`${accessory.name} (${accessory.instanceId}) / ${light.color}`);
+    }
+  }
+}
+
 export class TradfriAdapter extends Adapter {
   private devices: { [key: string]: LightBulb } = {};
 
@@ -112,7 +207,14 @@ export class TradfriAdapter extends Adapter {
             if (accessory.lightList && accessory.lightList.length > 0) {
               let light = accessory.lightList[0];
               console.log(`Creating device for ${accessory.name} (${accessory.instanceId})`);
-              device = new LightBulb(this, accessory, light, tradfri);
+              if (light.spectrum == "rgb") {
+                device = new ColorLightBulb(this,  accessory, light, tradfri);
+              } else if (light.spectrum == "white")  {
+               device = new WhiteSpectrumLightBulb(this, accessory, light, tradfri);
+              } else {
+                 device = new LightBulb(this, accessory, light, tradfri);
+              }
+             
               this.devices[accessory.instanceId] = device;
               this.handleDeviceAdded(device);
             }
