@@ -10,12 +10,13 @@ import { Adapter, Device, Property } from 'gateway-addon';
 import { TradfriClient, Accessory, AccessoryTypes, Light } from 'node-tradfri-client';
 
 //See WhiteSpectrumLightBulb
-function kelvinToPercent(value: number) : number {
-    return (value-2000)/2000*100;
+function kelvinToPercent(value: number): number {
+  return (value - 2000) / 2000 * 100;
 }
+
 //See WhiteSpectrumLightBulb
-function percentToKelvin(value: number) : number {
-    return (value/100)*2000+2000;
+function percentToKelvin(value: number): number {
+  return (value / 100) * 2000 + 2000;
 }
 
 class OnOffProperty extends Property {
@@ -38,6 +39,7 @@ class OnOffProperty extends Property {
     }
   }
 }
+
 class ColorProperty extends Property {
   constructor(private device: Device, private set: (value: string) => Promise<void>) {
     super(device, 'color', {
@@ -60,13 +62,13 @@ class ColorProperty extends Property {
 }
 
 class ColorTemperatureProperty extends Property {
-  constructor(private device: Device, minimum:number, maximum: number, private set: (value: number) => Promise<void>) {
+  constructor(private device: Device, minimum: number, maximum: number, private set: (value: number) => Promise<void>) {
     super(device, 'colorTemperature', {
       '@type': 'ColorTemperatureProperty',
       type: 'integer',
       unit: "kelvin",
       title: 'ColorTemperature',
-      minimum, 
+      minimum,
       maximum,
       description: 'Color temperature of the lightbulb'
     });
@@ -116,7 +118,7 @@ abstract class TradfriDevice extends Device {
     this.properties.set(property.name, property);
   }
 
-  public abstract update(accessory: Accessory) : void
+  public abstract update(accessory: Accessory): void
 }
 
 class LightBulb extends TradfriDevice {
@@ -143,7 +145,6 @@ class LightBulb extends TradfriDevice {
 
   }
 
- 
   public update(accessory: Accessory) {
     if (accessory.lightList && accessory.lightList.length > 0) {
       let light = accessory.lightList[0];
@@ -159,17 +160,17 @@ class LightBulb extends TradfriDevice {
   }
 }
 
-class WhiteSpectrumLightBulb extends LightBulb  {
+class WhiteSpectrumLightBulb extends LightBulb {
   private colorTemperatureProperty: ColorTemperatureProperty;
 
   constructor(adapter: Adapter, accessory: Accessory, light: Light, tradfri: TradfriClient) {
     super(adapter, accessory, light, tradfri);
-    
-    // Acording to ikea website 
+
+    // Acording to ikea website
     // "The colour temperature can be switched between 2200 Kelvin (warm glow), [...] and 4000 Kelvin (cool white)."
     // The mozila proposal recommand using Kelvin, but the node client use percentage.
     this.colorTemperatureProperty = new ColorTemperatureProperty(this, 2000, 4000, async value => {
-        await light.setColorTemperature(kelvinToPercent(value));
+      await light.setColorTemperature(kelvinToPercent(value));
     });
 
     this.addProperty(this.colorTemperatureProperty);
@@ -187,12 +188,12 @@ class WhiteSpectrumLightBulb extends LightBulb  {
   }
 }
 
-class ColorLightBulb extends LightBulb  {
+class ColorLightBulb extends LightBulb {
   private colorProperty: ColorProperty;
 
   constructor(adapter: Adapter, accessory: Accessory, light: Light, tradfri: TradfriClient) {
     super(adapter, accessory, light, tradfri);
-    
+
     this.colorProperty = new ColorProperty(this, async value => {
       await light.setColor(value.slice(1));
     });
@@ -204,7 +205,7 @@ class ColorLightBulb extends LightBulb  {
     if (accessory.lightList && accessory.lightList.length > 0) {
       let light = accessory.lightList[0];
 
-      this.colorProperty.setCachedValue("#"+light.color);
+      this.colorProperty.setCachedValue("#" + light.color);
       this.notifyPropertyChanged(this.colorProperty);
       console.log(`${accessory.name} (${accessory.instanceId}) / ${light.color}`);
     }
@@ -228,7 +229,6 @@ class SmartPlug extends TradfriDevice {
 
   }
 
-  
   public update(accessory: Accessory) {
     if (accessory.plugList && accessory.plugList.length > 0) {
       let plug = accessory.plugList[0];
@@ -259,13 +259,13 @@ export class TradfriAdapter extends Adapter {
               let light = accessory.lightList[0];
               console.log(`Creating device for ${accessory.name} (${accessory.instanceId})`);
               if (light.spectrum == "rgb") {
-                device = new ColorLightBulb(this,  accessory, light, tradfri);
-              } else if (light.spectrum == "white")  {
-               device = new WhiteSpectrumLightBulb(this, accessory, light, tradfri);
+                device = new ColorLightBulb(this, accessory, light, tradfri);
+              } else if (light.spectrum == "white") {
+                device = new WhiteSpectrumLightBulb(this, accessory, light, tradfri);
               } else {
-                 device = new LightBulb(this, accessory, light, tradfri);
+                device = new LightBulb(this, accessory, light, tradfri);
               }
-             
+
               this.devices[accessory.instanceId] = device;
               this.handleDeviceAdded(device);
             }
@@ -273,10 +273,9 @@ export class TradfriAdapter extends Adapter {
           if (accessory.type == AccessoryTypes.plug) {
             if (accessory.plugList && accessory.plugList.length > 0) {
               console.log(`Creating device for ${accessory.name} (${accessory.instanceId})`);
-              
-                device = new SmartPlug(this,  accessory, tradfri);
-              
-             
+
+              device = new SmartPlug(this, accessory, tradfri);
+
               this.devices[accessory.instanceId] = device;
               this.handleDeviceAdded(device);
             }
