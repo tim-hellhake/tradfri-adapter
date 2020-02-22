@@ -123,9 +123,8 @@ abstract class TradfriDevice extends Device {
 
 class LightBulb extends TradfriDevice {
   private onOffProperty: OnOffProperty;
-  private brightnessProperty: BrightnessProperty;
 
-  constructor(adapter: Adapter, accessory: Accessory, light: Light, tradfri: TradfriClient) {
+  constructor(adapter: Adapter, accessory: Accessory, tradfri: TradfriClient) {
     super(adapter, accessory);
     this['@type'] = ['Light'];
 
@@ -136,13 +135,6 @@ class LightBulb extends TradfriDevice {
     });
 
     this.addProperty(this.onOffProperty);
-
-    this.brightnessProperty = new BrightnessProperty(this, async value => {
-      await light.setBrightness(value);
-    });
-
-    this.addProperty(this.brightnessProperty);
-
   }
 
   public update(accessory: Accessory) {
@@ -152,6 +144,28 @@ class LightBulb extends TradfriDevice {
       this.onOffProperty.setCachedValue(light.onOff);
       this.notifyPropertyChanged(this.onOffProperty);
       console.log(`${accessory.name} (${accessory.instanceId}) / ${light.onOff}`);
+    }
+  }
+}
+
+class DimmableLightBulb extends LightBulb {
+  private brightnessProperty: BrightnessProperty;
+
+  constructor(adapter: Adapter, accessory: Accessory, light: Light, tradfri: TradfriClient) {
+    super(adapter, accessory, tradfri);
+
+    this.brightnessProperty = new BrightnessProperty(this, async value => {
+      await light.setBrightness(value);
+    });
+
+    this.addProperty(this.brightnessProperty);
+  }
+
+  public update(accessory: Accessory) {
+    super.update(accessory);
+
+    if (accessory.lightList && accessory.lightList.length > 0) {
+      let light = accessory.lightList[0];
 
       this.brightnessProperty.setCachedValue(light.dimmer);
       this.notifyPropertyChanged(this.brightnessProperty);
@@ -160,7 +174,7 @@ class LightBulb extends TradfriDevice {
   }
 }
 
-class WhiteSpectrumLightBulb extends LightBulb {
+class WhiteSpectrumLightBulb extends DimmableLightBulb {
   private colorTemperatureProperty: ColorTemperatureProperty;
 
   constructor(adapter: Adapter, accessory: Accessory, light: Light, tradfri: TradfriClient) {
@@ -190,14 +204,23 @@ class WhiteSpectrumLightBulb extends LightBulb {
 
 class ColorLightBulb extends LightBulb {
   private colorProperty: ColorProperty;
+  private brightnessProperty?: BrightnessProperty;
 
-  constructor(adapter: Adapter, accessory: Accessory, light: Light, tradfri: TradfriClient) {
-    super(adapter, accessory, light, tradfri);
+  constructor(adapter: Adapter, accessory: Accessory, light: Light, tradfri: TradfriClient, config: any) {
+    super(adapter, accessory, tradfri);
 
     this.colorProperty = new ColorProperty(this, async value => {
       await light.setColor(value.slice(1));
     });
     this.addProperty(this.colorProperty);
+
+    if (config?.experimental?.brightnessProperty) {
+      this.brightnessProperty = new BrightnessProperty(this, async value => {
+        await light.setBrightness(value);
+      });
+
+      this.addProperty(this.brightnessProperty);
+    }
   }
 
   public update(accessory: Accessory) {
@@ -208,6 +231,12 @@ class ColorLightBulb extends LightBulb {
       this.colorProperty.setCachedValue("#" + light.color);
       this.notifyPropertyChanged(this.colorProperty);
       console.log(`${accessory.name} (${accessory.instanceId}) / ${light.color}`);
+
+      if (this.brightnessProperty) {
+        this.brightnessProperty.setCachedValue(light.dimmer);
+        this.notifyPropertyChanged(this.brightnessProperty);
+        console.log(`${accessory.name} (${accessory.instanceId}) / ${light.dimmer}`);
+      }
     }
   }
 }
@@ -259,11 +288,11 @@ export class TradfriAdapter extends Adapter {
               let light = accessory.lightList[0];
               console.log(`Creating device for ${accessory.name} (${accessory.instanceId})`);
               if (light.spectrum == "rgb") {
-                device = new ColorLightBulb(this, accessory, light, tradfri);
+                device = new ColorLightBulb(this, accessory, light, tradfri, manifest.moziot.config);
               } else if (light.spectrum == "white") {
                 device = new WhiteSpectrumLightBulb(this, accessory, light, tradfri);
               } else {
-                device = new LightBulb(this, accessory, light, tradfri);
+                device = new LightBulb(this, accessory, tradfri);
               }
 
               this.devices[accessory.instanceId] = device;
