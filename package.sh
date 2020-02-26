@@ -15,6 +15,7 @@ npm ci --production
 
 shasum --algorithm 256 manifest.json package.json lib/*.js LICENSE README.md > SHA256SUMS
 
+rm -rf node_modules/.bin
 find node_modules \( -type f -o -type l \) -exec shasum --algorithm 256 {} \; >> SHA256SUMS
 
 TARFILE=`npm pack`
