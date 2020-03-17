@@ -66,7 +66,7 @@ class ColorTemperatureProperty extends Property {
     super(device, 'colorTemperature', {
       '@type': 'ColorTemperatureProperty',
       type: 'integer',
-      unit: "kelvin",
+      unit: 'kelvin',
       title: 'ColorTemperature',
       minimum,
       maximum,
@@ -181,7 +181,7 @@ class WhiteSpectrumLightBulb extends DimmableLightBulb {
     super(adapter, accessory, light, tradfri);
 
     // Acording to ikea website
-    // "The colour temperature can be switched between 2200 Kelvin (warm glow), [...] and 4000 Kelvin (cool white)."
+    // 'The colour temperature can be switched between 2200 Kelvin (warm glow), [...] and 4000 Kelvin (cool white).'
     // The mozila proposal recommand using Kelvin, but the node client use percentage.
     this.colorTemperatureProperty = new ColorTemperatureProperty(this, 2000, 4000, async value => {
       await light.setColorTemperature(kelvinToPercent(value));
@@ -228,7 +228,7 @@ class ColorLightBulb extends LightBulb {
     if (accessory.lightList && accessory.lightList.length > 0) {
       let light = accessory.lightList[0];
 
-      this.colorProperty.setCachedValue("#" + light.color);
+      this.colorProperty.setCachedValue('#' + light.color);
       this.notifyPropertyChanged(this.colorProperty);
       console.log(`${accessory.name} (${accessory.instanceId}) / ${light.color}`);
 
@@ -287,9 +287,9 @@ export class TradfriAdapter extends Adapter {
             if (accessory.lightList && accessory.lightList.length > 0) {
               let light = accessory.lightList[0];
               console.log(`Creating device for ${accessory.name} (${accessory.instanceId})`);
-              if (light.spectrum == "rgb") {
+              if (light.spectrum == 'rgb') {
                 device = new ColorLightBulb(this, accessory, light, tradfri, manifest.moziot.config);
-              } else if (light.spectrum == "white") {
+              } else if (light.spectrum == 'white') {
                 device = new WhiteSpectrumLightBulb(this, accessory, light, tradfri);
               } else {
                 device = new LightBulb(this, accessory, tradfri);
