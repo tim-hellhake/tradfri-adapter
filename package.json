@@ -69,7 +69,7 @@
     "node-tradfri-client": "^2.1.4"
   },
   "devDependencies": {
-    "@types/node": "^13.9.1",
+    "@types/node": "^13.9.2",
     "typescript": "^3.8.3"
   }
 }
