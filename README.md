@@ -12,3 +12,4 @@
 
 ## Supported devices
 * Light Bulb
+* Smart Plug
