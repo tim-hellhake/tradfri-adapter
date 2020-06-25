@@ -27,31 +27,33 @@ export class TradfriAdapter extends Adapter {
         let device = this.devices[accessory.instanceId];
 
         if (!device) {
-          if (accessory.type == AccessoryTypes.lightbulb) {
-            if (accessory.lightList && accessory.lightList.length > 0) {
-              let light = accessory.lightList[0];
-              console.log(`Creating device for ${accessory.name} (${accessory.instanceId})`);
-              if (light.spectrum == 'rgb') {
-                device = new ColorLightBulb(this, accessory, light, tradfri, manifest.moziot.config);
-              } else if (light.spectrum == 'white') {
-                device = new WhiteSpectrumLightBulb(this, accessory, light, tradfri);
-              } else {
-                device = new LightBulb(this, accessory, tradfri);
+          switch (accessory.type) {
+            case AccessoryTypes.lightbulb:
+              if (accessory.lightList && accessory.lightList.length > 0) {
+                let light = accessory.lightList[0];
+                console.log(`Creating device for ${accessory.name} (${accessory.instanceId})`);
+                if (light.spectrum == 'rgb') {
+                  device = new ColorLightBulb(this, accessory, light, tradfri, manifest.moziot.config);
+                } else if (light.spectrum == 'white') {
+                  device = new WhiteSpectrumLightBulb(this, accessory, light, tradfri);
+                } else {
+                  device = new LightBulb(this, accessory, tradfri);
+                }
+
+                this.devices[accessory.instanceId] = device;
+                this.handleDeviceAdded(device);
               }
+              break;
+            case AccessoryTypes.plug:
+              if (accessory.plugList && accessory.plugList.length > 0) {
+                console.log(`Creating device for ${accessory.name} (${accessory.instanceId})`);
 
-              this.devices[accessory.instanceId] = device;
-              this.handleDeviceAdded(device);
-            }
-          }
-          if (accessory.type == AccessoryTypes.plug) {
-            if (accessory.plugList && accessory.plugList.length > 0) {
-              console.log(`Creating device for ${accessory.name} (${accessory.instanceId})`);
+                device = new SmartPlug(this, accessory, tradfri);
 
-              device = new SmartPlug(this, accessory, tradfri);
-
-              this.devices[accessory.instanceId] = device;
-              this.handleDeviceAdded(device);
-            }
+                this.devices[accessory.instanceId] = device;
+                this.handleDeviceAdded(device);
+              }
+              break;
           }
         }
 
