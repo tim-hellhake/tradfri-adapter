@@ -42,6 +42,8 @@ export class TradfriAdapter extends Adapter {
 
                 this.devices[accessory.instanceId] = device;
                 this.handleDeviceAdded(device);
+              } else {
+                console.log(`Lightlist is empty`);
               }
               break;
             case AccessoryTypes.plug:
@@ -52,6 +54,8 @@ export class TradfriAdapter extends Adapter {
 
                 this.devices[accessory.instanceId] = device;
                 this.handleDeviceAdded(device);
+              } else {
+                console.log(`PlugList is empty`);
               }
               break;
           }
