@@ -32,12 +32,17 @@ export class TradfriAdapter extends Adapter {
               if (accessory.lightList && accessory.lightList.length > 0) {
                 let light = accessory.lightList[0];
                 console.log(`Creating device for ${accessory.name} (${accessory.instanceId})`);
-                if (light.spectrum == 'rgb') {
-                  device = new ColorLightBulb(this, accessory, light, tradfri, manifest.moziot.config);
-                } else if (light.spectrum == 'white') {
-                  device = new WhiteSpectrumLightBulb(this, accessory, light, tradfri);
-                } else {
-                  device = new LightBulb(this, accessory, tradfri);
+
+                switch (light.spectrum) {
+                  case "rgb":
+                    device = new ColorLightBulb(this, accessory, light, tradfri, manifest.moziot.config);
+                    break;
+                  case "white":
+                    device = new WhiteSpectrumLightBulb(this, accessory, light, tradfri);
+                    break;
+                  default:
+                    device = new LightBulb(this, accessory, tradfri);
+                    break;
                 }
 
                 this.devices[accessory.instanceId] = device;
