@@ -23,7 +23,7 @@ export class TradfriAdapter extends Adapter {
 
     tradfri
       .on('device updated', accessory => {
-        console.log(`Received update for ${accessory.name} (${accessory.instanceId})`)
+        console.log(`Received update for ${accessory.type} ${accessory.name} (${accessory.instanceId})`);
         let device = this.devices[accessory.instanceId];
 
         if (!device) {
@@ -31,7 +31,7 @@ export class TradfriAdapter extends Adapter {
             case AccessoryTypes.lightbulb:
               if (accessory.lightList && accessory.lightList.length > 0) {
                 let light = accessory.lightList[0];
-                console.log(`Creating device for ${accessory.name} (${accessory.instanceId})`);
+                console.log(`Creating device for ${accessory.type} ${accessory.name} (${accessory.instanceId})`);
 
                 switch (light.spectrum) {
                   case "rgb":
@@ -53,7 +53,7 @@ export class TradfriAdapter extends Adapter {
               break;
             case AccessoryTypes.plug:
               if (accessory.plugList && accessory.plugList.length > 0) {
-                console.log(`Creating device for ${accessory.name} (${accessory.instanceId})`);
+                console.log(`Creating device for ${accessory.type} ${accessory.name} (${accessory.instanceId})`);
 
                 device = new SmartPlug(this, accessory, tradfri);
 
