@@ -26,16 +26,6 @@
         "securityCode": {
           "type": "string",
           "title": "The security code on the bottom of your tradfri gateway"
-        },
-        "experimental": {
-          "type": "object",
-          "title": "Experimental features which may be removed at any time",
-          "properties": {
-            "brightnessProperty": {
-              "type": "boolean",
-              "title": "Enable the experimental brightness property"
-            }
-          }
         }
       }
     }

@@ -24,13 +24,11 @@ export class ColorLightBulb extends LightBulb {
         });
         this.addProperty(this.colorProperty);
 
-        if (config?.experimental?.brightnessProperty) {
-            this.brightnessProperty = new BrightnessProperty(this, async value => {
-                await light.setBrightness(value);
-            });
+        this.brightnessProperty = new BrightnessProperty(this, async value => {
+            await light.setBrightness(value);
+        });
 
-            this.addProperty(this.brightnessProperty);
-        }
+        this.addProperty(this.brightnessProperty);
     }
 
     public update(accessory: Accessory) {
