@@ -35,26 +35,6 @@
     "lib/WhiteSpectrumLightBulb.js",
     "manifest.json"
   ],
-  "moziot": {
-    "api": {
-      "min": 2,
-      "max": 2
-    },
-    "plugin": true,
-    "exec": "{nodeLoader} {path}",
-    "schema": {
-      "type": "object",
-      "required": [
-        "securityCode"
-      ],
-      "properties": {
-        "securityCode": {
-          "type": "string",
-          "title": "The security code on the bottom of your tradfri gateway"
-        }
-      }
-    }
-  },
   "dependencies": {
     "node-tradfri-client": "^2.1.6"
   },
