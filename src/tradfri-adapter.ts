@@ -21,9 +21,16 @@ export class TradfriAdapter extends Adapter {
     super(addonManager, name, manifest.id);
     addonManager.addAdapter(this);
 
+    const {
+      debug
+    } = manifest.moziot.config;
+
     tradfri
       .on('device updated', accessory => {
-        console.log(`Received update for ${accessory.type} ${accessory.name} (${accessory.instanceId})`);
+        if (debug) {
+          console.log(`Received update for ${accessory.type} ${accessory.name} (${accessory.instanceId})`);
+        }
+
         let device = this.devices[accessory.instanceId];
 
         if (!device) {

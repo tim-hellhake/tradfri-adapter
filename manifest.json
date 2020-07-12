@@ -26,6 +26,10 @@
         "securityCode": {
           "type": "string",
           "title": "The security code on the bottom of your tradfri gateway"
+        },
+        "debug": {
+          "type": "boolean",
+          "title": "Enable debug logs"
         }
       }
     }
