@@ -42,7 +42,7 @@ export class TradfriAdapter extends Adapter {
 
                 switch (light.spectrum) {
                   case "rgb":
-                    device = new ColorLightBulb(this, accessory, light, tradfri, manifest.moziot.config);
+                    device = new ColorLightBulb(this, accessory, light, tradfri);
                     break;
                   case "white":
                     device = new WhiteSpectrumLightBulb(this, accessory, light, tradfri);

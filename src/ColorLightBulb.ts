@@ -16,7 +16,7 @@ export class ColorLightBulb extends LightBulb {
     private colorProperty: ColorProperty;
     private brightnessProperty?: BrightnessProperty;
 
-    constructor(adapter: Adapter, accessory: Accessory, light: Light, tradfri: TradfriClient, config: any) {
+    constructor(adapter: Adapter, accessory: Accessory, light: Light, tradfri: TradfriClient) {
         super(adapter, accessory, tradfri);
 
         this.colorProperty = new ColorProperty(this, async value => {
