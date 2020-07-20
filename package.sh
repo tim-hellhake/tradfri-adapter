@@ -1,5 +1,10 @@
 #!/bin/bash -e
 
+# Setup environment for building inside Dockerized toolchain
+export NVM_DIR="${HOME}/.nvm"
+[ -s "${NVM_DIR}/nvm.sh" ] && source "${NVM_DIR}/nvm.sh"
+[ $(id -u) = 0 ] && umask 0
+
 npm ci
 npm run build
 rm -rf node_modules
