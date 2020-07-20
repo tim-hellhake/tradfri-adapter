@@ -38,7 +38,7 @@ export class TradfriAdapter extends Adapter {
             case AccessoryTypes.lightbulb:
               if (accessory.lightList && accessory.lightList.length > 0) {
                 let light = accessory.lightList[0];
-                console.log(`Creating device for ${accessory.type} ${accessory.name} (${accessory.instanceId})`);
+                console.log(`Creating device for ${light.spectrum} ${accessory.type} ${accessory.name} (${accessory.instanceId})`);
 
                 switch (light.spectrum) {
                   case "rgb":
