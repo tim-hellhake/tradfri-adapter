@@ -11,8 +11,8 @@ import { TradfriClient, AccessoryTypes } from 'node-tradfri-client';
 import { TradfriDevice } from './TradfriDevice';
 import { ColorLightBulb } from './ColorLightBulb';
 import { WhiteSpectrumLightBulb } from './WhiteSpectrumLightBulb';
-import { LightBulb } from './LightBulb';
 import { SmartPlug } from './SmartPlug';
+import { DimmableLightBulb } from './DimmableLightBulb';
 
 export class TradfriAdapter extends Adapter {
   private devices: { [key: string]: TradfriDevice } = {};
@@ -48,7 +48,7 @@ export class TradfriAdapter extends Adapter {
                     device = new WhiteSpectrumLightBulb(this, accessory, light, tradfri);
                     break;
                   default:
-                    device = new LightBulb(this, accessory, tradfri);
+                    device = new DimmableLightBulb(this, accessory, light, tradfri);
                     break;
                 }
 

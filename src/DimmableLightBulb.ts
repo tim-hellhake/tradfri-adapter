@@ -12,22 +12,24 @@ import { LightBulb } from './LightBulb';
 import { BrightnessProperty } from './BrightnessProperty';
 
 export class DimmableLightBulb extends LightBulb {
-    private brightnessProperty: BrightnessProperty;
+    private brightnessProperty?: BrightnessProperty;
 
     constructor(adapter: Adapter, accessory: Accessory, light: Light, tradfri: TradfriClient) {
         super(adapter, accessory, tradfri);
 
-        this.brightnessProperty = new BrightnessProperty(this, async value => {
-            await light.setBrightness(value);
-        });
+        if(light.isDimmable) {
+            this.brightnessProperty = new BrightnessProperty(this, async value => {
+                await light.setBrightness(value);
+            });
 
-        this.addProperty(this.brightnessProperty);
+            this.addProperty(this.brightnessProperty);
+        }
     }
 
     public update(accessory: Accessory) {
         super.update(accessory);
 
-        if (accessory.lightList && accessory.lightList.length > 0) {
+        if (this.brightnessProperty && accessory.lightList && accessory.lightList.length > 0) {
             let light = accessory.lightList[0];
 
             this.brightnessProperty.setCachedValue(light.dimmer);
