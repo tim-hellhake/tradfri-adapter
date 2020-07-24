@@ -29,6 +29,8 @@ export class SmartPlug extends TradfriDevice {
     }
 
     public update(accessory: Accessory) {
+        super.update(accessory);
+
         if (accessory.plugList && accessory.plugList.length > 0) {
             let plug = accessory.plugList[0];
 
