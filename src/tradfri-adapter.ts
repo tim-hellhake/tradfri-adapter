@@ -7,12 +7,13 @@
 'use strict';
 
 import { Adapter } from 'gateway-addon';
-import { TradfriClient, AccessoryTypes } from 'node-tradfri-client';
+import { TradfriClient, AccessoryTypes, PowerSources } from 'node-tradfri-client';
 import { TradfriDevice } from './TradfriDevice';
 import { ColorLightBulb } from './ColorLightBulb';
 import { WhiteSpectrumLightBulb } from './WhiteSpectrumLightBulb';
 import { SmartPlug } from './SmartPlug';
 import { DimmableLightBulb } from './DimmableLightBulb';
+import { Remote } from './Remote';
 
 export class TradfriAdapter extends Adapter {
   private devices: { [key: string]: TradfriDevice } = {};
@@ -35,6 +36,16 @@ export class TradfriAdapter extends Adapter {
 
         if (!device) {
           switch (accessory.type) {
+            case AccessoryTypes.remote:
+              if (accessory.deviceInfo.power == PowerSources.Battery) {
+                console.log(`Creating device for ${accessory.type} ${accessory.name} (${accessory.instanceId})`);
+                device = new Remote(this, accessory);
+                this.devices[accessory.instanceId] = device;
+                this.handleDeviceAdded(device);
+              } else {
+                console.log(`Power type of ${accessory.type} ${accessory.name} (${accessory.instanceId}) is ${accessory.deviceInfo.power}, ignoring it`);
+              }
+              break;
             case AccessoryTypes.lightbulb:
               if (accessory.lightList && accessory.lightList.length > 0) {
                 let light = accessory.lightList[0];
