@@ -25,11 +25,38 @@
       "properties": {
         "securityCode": {
           "type": "string",
-          "title": "The security code on the bottom of your tradfri gateway"
+          "title": "The security code on the bottom of your tradfri gateway (used for the discovered gateway)"
         },
         "debug": {
           "type": "boolean",
           "title": "Enable debug logs"
+        },
+        "gatewayList": {
+          "type": "array",
+          "title": "List of manually added gateways",
+          "items": {
+            "type": "object",
+            "title": "A gateway",
+            "required": [
+              "hostname",
+              "securityCode"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "The ID of the gateway (will be generated for you)",
+                "readOnly": true
+              },
+              "hostname": {
+                "type": "string",
+                "title": "The ip address or hostname of the gateway"
+              },
+              "securityCode": {
+                "type": "string",
+                "title": "The security code on the bottom of your tradfri gateway"
+              }
+            }
+          }
         }
       }
     }

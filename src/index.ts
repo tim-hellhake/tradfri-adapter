@@ -6,12 +6,14 @@
 
 'use strict';
 
+import crypto from 'crypto';
 import { Database } from 'gateway-addon';
 import { TradfriAdapter } from './tradfri-adapter';
 import { discoverGateway, TradfriClient, TradfriErrorCodes, TradfriError } from "node-tradfri-client";
 
 export = (addonManager: any, manifest: any) => {
     discover(addonManager, manifest);
+    loadGatewayFromConfig(addonManager, manifest);
 };
 
 interface Config {
@@ -68,6 +70,31 @@ async function discover(addonManager: any, manifest: any) {
     }
 }
 
+async function loadGatewayFromConfig(addonManager: any, manifest: any) {
+    const db = new Database(manifest.name);
+    await db.open();
+    const config = await db.loadConfig();
+
+    if (config.gatewayList) {
+        for (const gateway of config.gatewayList) {
+            const {
+                hostname,
+                securityCode
+            } = gateway;
+
+            if (!gateway.id) {
+                gateway.id = `${crypto.randomBytes(16).toString('hex')}`;
+                console.log(`Adding id for device at ${hostname}`);
+            }
+
+            console.log(`Connecting to manually added gateway at ${hostname}`);
+            await connect(addonManager, manifest, hostname, hostname, securityCode);
+        }
+    }
+
+    await db.saveConfig(config);
+}
+
 async function connect(addonManager: any, manifest: any, name: string, address: string, securityCode: string) {
     const database = new Database(manifest.name);
     await database.open();
@@ -105,7 +132,6 @@ async function connect(addonManager: any, manifest: any, name: string, address: 
 
     await tradfri.connect(identity, psk);
     new TradfriAdapter(addonManager, manifest, name, tradfri);
-
 }
 
 function printTradfriError(e: TradfriError) {
