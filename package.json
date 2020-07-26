@@ -1,7 +1,7 @@
 {
   "name": "tradfri-adapter",
   "display_name": "Tradfri",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Connect your Tradfri devices",
   "main": "lib/index.js",
   "scripts": {

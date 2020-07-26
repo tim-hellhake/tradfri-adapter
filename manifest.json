@@ -3,7 +3,7 @@
   "id": "tradfri-adapter",
   "name": "Tradfri",
   "short_name": "Tradfri",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Connect your Tradfri devices",
   "homepage_url": "https://github.com/tim-hellhake/tradfri-adapter#readme",
   "license": "MPL-2.0",
